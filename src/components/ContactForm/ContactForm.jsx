@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { nanoid } from 'nanoid';
 import { Form, Label, Input, Button } from './ContactForm.styled';
 
-export default function ContactForm({onSubmit}) {
+export default function ContactForm({ onSubmit }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
