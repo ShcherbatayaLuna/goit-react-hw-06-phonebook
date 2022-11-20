@@ -1,32 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact, deleteContact, filterContact } from 'redux/ContactsSlice';
+import { nanoid } from 'nanoid';
 import ContactForm from '../ContactForm/ContactForm';
 import Filter from '../Filter/Filter';
 import ContactList from '../ContactList/ContactList';
 import { Container, TitlePrimary, TitleSecondary } from './App.styled';
 
-const LOCAL_STORAGE_KEY = 'contacts-list';
-
 export default function App() {
-  const [contacts, setContacts] = useState(() => {
-    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) ?? [];
-  });
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(contacts));
-  }, [contacts]);
+  const formSubmitHandler = ({ name, number }) => {
+    const todo = {
+      id: nanoid(),
+      name,
+      number,
+    };
 
-  const formSubmitHandler = data => {
-    contacts.some(
-      ({ name }) => name.toLowerCase().trim() === data.name.toLowerCase().trim()
-    )
-      ? alert('This contact is already in list')
-      : setContacts([...contacts, data]);
+    dispatch(addContact(todo));
   };
 
-  const filterContact = () => {
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase().trim())
+  const getVisibleContacts = () => {
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter(({name}) =>
+      name.toLowerCase().includes(normalizedFilter)
     );
   };
 
@@ -38,16 +36,11 @@ export default function App() {
       <TitleSecondary>Contacts</TitleSecondary>
       <Filter
         filter={filter}
-        onChange={event => setFilter(event.target.value)}
+        onChange={event => dispatch(filterContact(event.target.value))}
       />
       <ContactList
-        contacts={filterContact()}
-        deleteContact={id => {
-          setContacts(prevState =>
-            prevState.filter(contact => contact.id !== id)
-          );
-          setFilter('');
-        }}
+        contacts={getVisibleContacts()}
+        deleteContact={event => dispatch(deleteContact(event))}
       />
     </Container>
   );
